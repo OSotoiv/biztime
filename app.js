@@ -2,16 +2,16 @@
 
 
 const express = require("express");
-
 const app = express();
 const ExpressError = require("./expressError")
 
 app.use(express.json());
-
+const companiesRoutes = require('./routes/companies');
+app.use('/companies', companiesRoutes);
 
 /** 404 handler */
 
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
   const err = new ExpressError("Not Found", 404);
   return next(err);
 });
