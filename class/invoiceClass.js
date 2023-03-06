@@ -36,9 +36,10 @@ class Invoice {
         companies.name,
         COUNT(DISTINCT CASE WHEN invoices.paid = false THEN invoices.id END) AS unpaid_invoices_count,
         SUM(CASE WHEN invoices.paid = false THEN invoices.amt END) AS unpaid_invoices_total,
+        ARRAY_AGG(DISTINCT CASE WHEN invoices.paid = false THEN invoices.id END) AS unpaid_invoice_ids,
         COUNT(DISTINCT CASE WHEN invoices.paid = true THEN invoices.id END) AS paid_invoices_count,
         SUM(CASE WHEN invoices.paid = true THEN invoices.amt END) AS paid_invoices_total,
-        ARRAY_AGG(invoices.id) AS invoice_ids
+        ARRAY_AGG(DISTINCT CASE WHEN invoices.paid = true THEN invoices.id END) AS paid_invoice_ids
         FROM companies
         LEFT JOIN invoices ON invoices.comp_code = companies.code
         GROUP BY companies.code;
