@@ -1,0 +1,6 @@
+// send to POST /companies
+{
+    "code": "ccmc",
+    "name": "Cook Children's Hospital",
+    "description": "Childrens"
+}
