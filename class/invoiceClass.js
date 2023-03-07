@@ -2,10 +2,14 @@ const db = require('../db');
 const ExpressError = require('../expressError')
 
 class Invoice {
-    constructor(comp_code, amt) {
+    constructor(comp_code, amt, paid, add_date, paid_date, id) {
         // CONSTRAINT invoices_amt_check CHECK ((amt > (0)::double precision))
         this.comp_code = comp_code;
         this.amt = amt;
+        this.paid = paid || false;
+        this.add_date = add_date || new Date();
+        this.paid_date = paid_date || null;
+        this.id = id || null
     }
     async save() {
         try {
@@ -19,14 +23,36 @@ class Invoice {
             throw new ExpressError(`${e.detail}`, 400);
         }
     }
-    // async update()
-    // async delete()
-    static async getbyCODE() {
-        //get all invoices for a company by company.code http://localhost:3000/invoices?comp_code=apple
-        const results = await db.query(``)
+    async update(amt) {
+        const results = await db.query(`UPDATE invoices SET amt = $1 WHERE id = $2 RETURNING *;`, [parseFloat(amt), this.id]);
+        if (results.rows[0]) {
+            return results.rows[0];
+        }
+        throw new ExpressError(`Error while updating Invoice ${this.id}`, 500);
     }
-    static async getbyID() {
-        //get a single invoice by id
+    async delete() {
+        const results = await db.query(`DELETE FROM invoices WHERE invoices.id = $1 RETURNING *`, [this.id]);
+        if (results.rows[0]) {
+            return results.rows[0];
+        }
+        throw new ExpressError(`Error While Deleting ${this.code}`, 500)
+    }
+    static async getbyCODE(code) {
+        //get all invoices for a company by company.code http://localhost:3000/invoices?comp_code=apple
+        const results = await db.query(`SELECT * FROM invoices WHERE invoices.comp_code = $1`, [code]);
+        if (results.rows[0]) {
+            return results.rows;
+        }
+        return `No Invoices found for ${code}`
+    }
+    static async getbyID(id) {
+        //get a single invoice by invoice.id
+        const results = await db.query(`SELECT * FROM invoices WHERE invoices.id = $1`, [id]);
+        if (results.rows[0]) {
+            const { comp_code, amt, paid, add_date, paid_date } = results.rows[0];
+            return new Invoice(comp_code, amt, paid, add_date, paid_date, id);
+        }
+        throw new ExpressError(`No Invoices found for ID of ${id}`, 400)
     }
 
     static async getAll() {
@@ -49,6 +75,16 @@ class Invoice {
         } else {
             return 'No Invoices Found';
         }
+    }
+    static async validate(comp_code, amt, paid, add_date, paid_date, id) {
+        if (!comp_code.trim() || !parseFloat(amt)) {
+            throw new ExpressError('Company code and Invoice amount are required', 400)
+        }
+        const res = await db.query(`SELECT name FROM companies WHERE code = $1;`, [comp_code])
+        if (res.rows[0]) {
+            return new Invoice(comp_code, amt, paid, add_date, paid_date, id)
+        }
+        throw new ExpressError('Please provide a valid Company Code', 400)
     }
 }
 
