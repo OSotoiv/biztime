@@ -40,10 +40,10 @@ router.post('/', async (req, res, next) => {
 
 router.patch('/:code', async (req, res, next) => {
     try {
-        const { code: o_code } = req.params;
-        const { code = "", name = "", description = "" } = req.body;
-        const comp = await Company.getbyCODE(o_code);
-        const results = await comp.update(code, name, description);
+        const { code } = req.params;
+        const { name = "", description = "" } = req.body;
+        const comp = await Company.getbyCODE(code);
+        const results = await comp.update(name, description);
         return res.json({ updated: results });
     } catch (e) {
         next(e);

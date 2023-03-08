@@ -13,6 +13,9 @@ app.use('/companies', companiesRoutes);
 const invoicesRoutes = require('./routes/invoices');
 app.use('/invoices', invoicesRoutes);
 
+const industiresRoutes = require('./routes/industries');
+app.use('/industries', industiresRoutes);
+
 
 /** 404 handler */
 app.use(function (req, res, next) {

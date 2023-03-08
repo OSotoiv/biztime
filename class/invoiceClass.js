@@ -1,5 +1,6 @@
 const db = require('../db');
-const ExpressError = require('../expressError')
+const ExpressError = require('../expressError');
+
 
 class Invoice {
     constructor(comp_code, amt, paid, add_date, paid_date, id) {
@@ -77,6 +78,7 @@ class Invoice {
         }
     }
     static async validate(comp_code, amt, paid, add_date, paid_date, id) {
+        //validate before create new Invoice
         if (!comp_code.trim() || !parseFloat(amt)) {
             throw new ExpressError('Company code and Invoice amount are required', 400)
         }
